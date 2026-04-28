@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BeerListView: View {
     @State private var viewModel = BeerListViewModel()
+    @State private var searchText = ""
 
     var body: some View {
         NavigationStack {
@@ -24,6 +25,15 @@ struct BeerListView: View {
                 }
             }
             .navigationTitle("Beers")
+            .searchable(text: $searchText, prompt: "Search beers")
+            .onSubmit(of: .search) {
+                Task { await viewModel.fetchBeers(name: searchText) }
+            }
+            .onChange(of: searchText) { _, newValue in
+                if newValue.isEmpty {
+                    Task { await viewModel.fetchBeers() }
+                }
+            }
             .task {
                 await viewModel.fetchBeers()
             }
