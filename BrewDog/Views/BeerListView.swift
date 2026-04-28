@@ -13,14 +13,15 @@ struct BeerListView: View {
                     Text("Error: \(error)")
                 } else {
                     List(viewModel.beers) { beer in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(beer.name).font(.headline)
-                            Text(beer.tagline).font(.subheadline).foregroundStyle(.secondary)
-                            Text("First brewed: \(beer.firstBrewed)")
-                            Text("ABV: \(beer.abv.map { String($0) } ?? "N/A")%")
-                            Text(beer.description).font(.caption).lineLimit(3)
+                        NavigationLink(destination: BeerDetailView(beer: beer)) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(beer.name).font(.headline)
+                                Text(beer.tagline).font(.subheadline).foregroundStyle(.secondary)
+                                Text("First brewed: \(beer.firstBrewed)")
+                                Text("ABV: \(beer.abv.map { String($0) } ?? "N/A")%")
+                            }
+                            .padding(.vertical, 4)
                         }
-                        .padding(.vertical, 4)
                     }
                 }
             }
