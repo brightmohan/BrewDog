@@ -18,6 +18,7 @@ struct BeerDetailView: View {
             }
             .padding(.bottom)
         }
+        .background(Color.brewBackground)
         .navigationTitle(beer.name)
         .navigationBarTitleDisplayMode(.large)
     }
@@ -110,6 +111,7 @@ private struct SectionHeader: View {
             .font(.headline)
             .padding(.top, 4)
         Divider()
+            .overlay(Color.brewAmber.opacity(0.4))
     }
 }
 
