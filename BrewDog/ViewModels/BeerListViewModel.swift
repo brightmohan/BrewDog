@@ -8,6 +8,16 @@ class BeerListViewModel {
 
     private let baseURL = "https://punkapi-alxiw.amvera.io/v3/beers"
 
+    func fetchRandomBeer() async -> Beer? {
+        guard let url = URL(string: "\(baseURL)/random") else { return nil }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            return try JSONDecoder().decode(Beer.self, from: data)
+        } catch {
+            return nil
+        }
+    }
+
     func fetchBeers(page: Int = 1, name: String = "") async {
         isLoading = true
         errorMessage = nil

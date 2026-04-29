@@ -8,6 +8,9 @@ struct BeerListView: View {
     @State private var searchText = ""
     @State private var viewMode: ViewMode = .list
     @State private var sortOrder: SortOrder = .nameAsc
+    @State private var spinAngle: Double = 0
+    @State private var isSpinning = false
+    @State private var randomBeer: Beer?
 
     private var sortedBeers: [Beer] {
         switch sortOrder {
@@ -20,9 +23,16 @@ struct BeerListView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 sectionHeader
+                spinTheBottleButton
                 content
             }
             .navigationTitle("Home")
+            .sheet(item: $randomBeer) { beer in
+                NavigationStack {
+                    BeerDetailView(beer: beer)
+                        .navigationBarTitleDisplayMode(.large)
+                }
+            }
             .searchable(text: $searchText, prompt: "Search for beers or food pairings")
             .onSubmit(of: .search) {
                 Task { await viewModel.fetchBeers(name: searchText) }
@@ -61,6 +71,34 @@ struct BeerListView: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
+    }
+
+    private var spinTheBottleButton: some View {
+        Button {
+            guard !isSpinning else { return }
+            isSpinning = true
+            withAnimation(.linear(duration: 1.5)) {
+                spinAngle += 360 * 5
+            }
+            Task {
+                randomBeer = await viewModel.fetchRandomBeer()
+                isSpinning = false
+            }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "dice")
+                    .rotationEffect(.degrees(spinAngle))
+                Text("Spin the bottle")
+            }
+            .font(.headline)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.blue.opacity(0.15))
+            .foregroundStyle(.blue)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .padding(.horizontal)
+        .padding(.bottom, 8)
     }
 
     @ViewBuilder
