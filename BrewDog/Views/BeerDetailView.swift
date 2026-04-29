@@ -6,7 +6,7 @@ struct BeerDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                beerImage
+                BeerImageView(url: beer.imageURL, height: 280)
                 Group {
                     metadata
                     descriptionSection
@@ -20,42 +20,6 @@ struct BeerDetailView: View {
         }
         .navigationTitle(beer.name)
         .navigationBarTitleDisplayMode(.large)
-    }
-
-    @ViewBuilder
-    private var beerImage: some View {
-        if let url = beer.imageURL {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 280)
-                case .failure:
-                    imagePlaceholder
-                case .empty:
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 280)
-                @unknown default:
-                    imagePlaceholder
-                }
-            }
-        } else {
-            imagePlaceholder
-        }
-    }
-
-    private var imagePlaceholder: some View {
-        Image(systemName: "mug")
-            .resizable()
-            .scaledToFit()
-            .frame(height: 120)
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 280)
     }
 
     private var metadata: some View {

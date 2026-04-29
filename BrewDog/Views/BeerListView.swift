@@ -14,11 +14,13 @@ struct BeerListView: View {
                 } else {
                     List(viewModel.beers) { beer in
                         NavigationLink(destination: BeerDetailView(beer: beer)) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(beer.name).font(.headline)
-                                Text(beer.tagline).font(.subheadline).foregroundStyle(.secondary)
-                                Text("First brewed: \(beer.firstBrewed)")
-                                Text("ABV: \(beer.abv.map { String($0) } ?? "N/A")%")
+                            HStack(spacing: 12) {
+                                BeerImageView(url: beer.imageURL, height: 60)
+                                    .frame(width: 44)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(beer.name).font(.headline)
+                                    Text(beer.tagline).font(.subheadline).foregroundStyle(.secondary)
+                                }
                             }
                             .padding(.vertical, 4)
                         }
