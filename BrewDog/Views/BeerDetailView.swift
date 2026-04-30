@@ -3,6 +3,7 @@ import SwiftUI
 struct BeerDetailView: View {
     let beer: Beer
     @Environment(FavouritesStore.self) private var favourites
+    @State private var selectedPairing: String?
 
     var body: some View {
         ScrollView {
@@ -114,8 +115,23 @@ struct BeerDetailView: View {
             VStack(alignment: .leading, spacing: 6) {
                 SectionHeader(title: "Food Pairing")
                 ForEach(pairings, id: \.self) { pairing in
-                    Label(pairing, systemImage: "fork.knife")
-                        .font(.body)
+                    Button {
+                        selectedPairing = pairing
+                    } label: {
+                        Label(pairing, systemImage: "fork.knife")
+                            .font(.body)
+                            .foregroundStyle(.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+            .sheet(isPresented: Binding(
+                get: { selectedPairing != nil },
+                set: { if !$0 { selectedPairing = nil } }
+            )) {
+                if let pairing = selectedPairing {
+                    RecipeSheetView(query: pairing)
+                        .presentationDetents([.medium, .large])
                 }
             }
         }
