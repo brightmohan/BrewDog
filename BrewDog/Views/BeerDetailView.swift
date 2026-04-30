@@ -2,11 +2,13 @@ import SwiftUI
 
 struct BeerDetailView: View {
     let beer: Beer
+    @Environment(FavouritesStore.self) private var favourites
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 BeerImageView(url: beer.imageURL, height: 280)
+                nameHeader
                 Group {
                     metadata
                     descriptionSection
@@ -19,8 +21,25 @@ struct BeerDetailView: View {
             .padding(.bottom)
         }
         .background(Color.brewBackground)
-        .navigationTitle(beer.name)
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var nameHeader: some View {
+        HStack {
+            Text(beer.name)
+                .font(.title)
+                .bold()
+            Spacer()
+            Button {
+                favourites.toggle(beer)
+            } label: {
+                Image(systemName: favourites.isFavourite(beer) ? "heart.fill" : "heart")
+                    .font(.title2)
+                    .foregroundStyle(favourites.isFavourite(beer) ? .red : .secondary)
+            }
+        }
+        .padding(.horizontal)
     }
 
     private var metadata: some View {
@@ -164,4 +183,5 @@ private struct IngredientRow: View {
             foodPairing: ["Spicy chicken tikka masala", "Grilled chicken quesadilla"]
         ))
     }
+    .environment(FavouritesStore())
 }
