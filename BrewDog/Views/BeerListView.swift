@@ -26,6 +26,7 @@ struct BeerListView: View {
                 spinTheBottleButton
                 content
             }
+            .background(Color.brewBackground)
             .navigationTitle("Home")
             .sheet(item: $randomBeer) { beer in
                 NavigationStack {
@@ -93,8 +94,8 @@ struct BeerListView: View {
             .font(.headline)
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color.blue.opacity(0.15))
-            .foregroundStyle(.blue)
+            .background(Color.brewAmber.opacity(0.15))
+            .foregroundStyle(Color.brewAmber)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .padding(.horizontal)

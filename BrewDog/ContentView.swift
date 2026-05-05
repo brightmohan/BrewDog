@@ -2,16 +2,17 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        TabView{
+        TabView {
             BeerListView()
-                .tabItem{
+                .tabItem {
                     Label("Home", systemImage: "house")
                 }
             FavouriteView()
-                .tabItem{
+                .tabItem {
                     Label("Favourites", systemImage: "heart")
                 }
         }
+        .tint(.brewAmber)
         
     }
 }
