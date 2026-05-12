@@ -6,11 +6,13 @@ class FavouritesStore {
     private(set) var favouriteBeers: [Beer] = []
 
     private var favouriteIDs: Set<Int> = []
+    private let defaults: UserDefaults
 
-    init() {
-        let ids = UserDefaults.standard.array(forKey: "favouriteIDs") as? [Int] ?? []
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        let ids = defaults.array(forKey: "favouriteIDs") as? [Int] ?? []
         favouriteIDs = Set(ids)
-        if let data = UserDefaults.standard.data(forKey: "favouriteBeers"),
+        if let data = defaults.data(forKey: "favouriteBeers"),
            let beers = try? JSONDecoder().decode([Beer].self, from: data) {
             favouriteBeers = beers
         }
@@ -32,9 +34,9 @@ class FavouritesStore {
     }
 
     private func persist() {
-        UserDefaults.standard.set(Array(favouriteIDs), forKey: "favouriteIDs")
+        defaults.set(Array(favouriteIDs), forKey: "favouriteIDs")
         if let data = try? JSONEncoder().encode(favouriteBeers) {
-            UserDefaults.standard.set(data, forKey: "favouriteBeers")
+            defaults.set(data, forKey: "favouriteBeers")
         }
     }
 }
