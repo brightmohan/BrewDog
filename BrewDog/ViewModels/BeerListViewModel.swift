@@ -7,11 +7,16 @@ class BeerListViewModel {
     var errorMessage: String?
 
     private let baseURL = "https://punkapi-alxiw.amvera.io/v3/beers"
+    private let session: URLSession
+
+    init(session: URLSession = .shared) {
+        self.session = session
+    }
 
     func fetchRandomBeer() async -> Beer? {
         guard let url = URL(string: "\(baseURL)/random") else { return nil }
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await session.data(from: url)
             return try JSONDecoder().decode(Beer.self, from: data)
         } catch {
             return nil
@@ -33,7 +38,7 @@ class BeerListViewModel {
         guard let url = components.url else { return }
 
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await session.data(from: url)
             beers = try JSONDecoder().decode([Beer].self, from: data)
         } catch {
             errorMessage = error.localizedDescription
