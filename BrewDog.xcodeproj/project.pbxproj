@@ -17,6 +17,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6F0AC2342FB2AD330082714E /* BrewDog.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = BrewDog.xctestplan; sourceTree = "<group>"; };
 		6FF0AA822FA05F3F00218E23 /* BrewDog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BrewDog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6FF15DE72FAC0CA900A0BEFF /* BrewDogTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewDogTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -55,6 +56,7 @@
 		6FF0AA792FA05F3F00218E23 = {
 			isa = PBXGroup;
 			children = (
+				6F0AC2342FB2AD330082714E /* BrewDog.xctestplan */,
 				6FF0AA842FA05F3F00218E23 /* BrewDog */,
 				6FF15DE82FAC0CA900A0BEFF /* BrewDogTests */,
 				6FF0AA832FA05F3F00218E23 /* Products */,
