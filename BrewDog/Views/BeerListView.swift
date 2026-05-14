@@ -49,7 +49,9 @@ struct BeerListView: View {
                 }
             }
             .task {
-                await viewModel.fetchBeers()
+                if viewModel.beers.isEmpty {
+                    await viewModel.fetchBeers()
+                }
             }
         }
     }
