@@ -8,8 +8,6 @@ struct BeerListView: View {
     @State private var searchText = ""
     @State private var viewMode: ViewMode = .list
     @State private var sortOrder: SortOrder = .nameAsc
-    @State private var spinAngle: Double = 0
-    @State private var isSpinning = false
     @State private var randomBeer: Beer?
 
     private var sortedBeers: [Beer] {
@@ -22,9 +20,16 @@ struct BeerListView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                sectionHeader
-                spinTheBottleButton
-                content
+                BeerListHeader(viewMode: $viewMode, sortOrder: $sortOrder)
+                SpinTheBottleButton(randomBeer: $randomBeer) {
+                    await viewModel.fetchRandomBeer()
+                }
+                BeerListContent(
+                    isLoading: viewModel.isLoading,
+                    errorMessage: viewModel.errorMessage,
+                    viewMode: viewMode,
+                    beers: sortedBeers
+                )
             }
             .background(Color.brewBackground)
             .navigationTitle("Home")
@@ -48,24 +53,29 @@ struct BeerListView: View {
             }
         }
     }
+}
 
-    private var sectionHeader: some View {
+private struct BeerListHeader: View {
+    @Binding var viewMode: BeerListView.ViewMode
+    @Binding var sortOrder: BeerListView.SortOrder
+
+    var body: some View {
         HStack {
             Text("Beer").font(.title2).bold()
             Spacer()
             Menu {
                 Picker("Layout", selection: $viewMode) {
-                    Label("Grid", systemImage: "square.grid.2x2").tag(ViewMode.grid)
-                    Label("List", systemImage: "list.bullet").tag(ViewMode.list)
+                    Label("Grid", systemImage: "square.grid.2x2").tag(BeerListView.ViewMode.grid)
+                    Label("List", systemImage: "list.bullet").tag(BeerListView.ViewMode.list)
                 }
                 Menu {
                     Picker("Sort by", selection: $sortOrder) {
-                        Text("Name").tag(SortOrder.nameAsc)
-                        Text("ABV").tag(SortOrder.abvDesc)
+                        Text("Name").tag(BeerListView.SortOrder.nameAsc)
+                        Text("ABV").tag(BeerListView.SortOrder.abvDesc)
                     }
                 } label: {
                     Label("Sort", systemImage: "arrow.up.arrow.down")
-                }                
+                }
             } label: {
                 Image(systemName: "ellipsis.circle")
             }
@@ -73,8 +83,16 @@ struct BeerListView: View {
         .padding(.horizontal)
         .padding(.vertical, 8)
     }
+}
 
-    private var spinTheBottleButton: some View {
+private struct SpinTheBottleButton: View {
+    @Binding var randomBeer: Beer?
+    let fetchRandomBeer: () async -> Beer?
+
+    @State private var spinAngle: Double = 0
+    @State private var isSpinning = false
+
+    var body: some View {
         Button {
             guard !isSpinning else { return }
             isSpinning = true
@@ -82,7 +100,7 @@ struct BeerListView: View {
                 spinAngle += 360 * 5
             }
             Task {
-                randomBeer = await viewModel.fetchRandomBeer()
+                randomBeer = await fetchRandomBeer()
                 isSpinning = false
             }
         } label: {
@@ -98,20 +116,27 @@ struct BeerListView: View {
             .foregroundStyle(Color.brewAmber)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
+        .disabled(isSpinning)
         .padding(.horizontal)
         .padding(.bottom, 8)
     }
+}
 
-    @ViewBuilder
-    private var content: some View {
-        if viewModel.isLoading {
+private struct BeerListContent: View {
+    let isLoading: Bool
+    let errorMessage: String?
+    let viewMode: BeerListView.ViewMode
+    let beers: [Beer]
+
+    var body: some View {
+        if isLoading {
             ProgressView("Loading beers...")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if let error = viewModel.errorMessage {
+        } else if let error = errorMessage {
             Text("Error: \(error)")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if viewMode == .list {
-            List(sortedBeers) { beer in
+            List(beers) { beer in
                 NavigationLink(destination: BeerDetailView(beer: beer)) {
                     HStack(spacing: 12) {
                         BeerImageView(url: beer.imageURL, height: 60)
@@ -130,7 +155,7 @@ struct BeerListView: View {
         } else {
             ScrollView {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                    ForEach(sortedBeers) { beer in
+                    ForEach(beers) { beer in
                         NavigationLink(destination: BeerDetailView(beer: beer)) {
                             VStack(spacing: 8) {
                                 BeerImageView(url: beer.imageURL, height: 120)

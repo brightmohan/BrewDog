@@ -2,20 +2,22 @@ import SwiftUI
 
 struct BeerDetailView: View {
     let beer: Beer
-    @Environment(FavouritesStore.self) private var favourites
-    @State private var selectedPairing: String?
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 BeerImageView(url: beer.imageURL, height: 280)
-                nameHeader
+                BeerNameHeader(beer: beer)
                 Group {
                     metadata
                     descriptionSection
-                    ingredientsSection
+                    if let ingredients = beer.ingredients {
+                        IngredientsSection(ingredients: ingredients)
+                    }
                     brewersTipsSection
-                    foodPairingSection
+                    if let pairings = beer.foodPairing, !pairings.isEmpty {
+                        FoodPairingSection(pairings: pairings)
+                    }
                 }
                 .padding(.horizontal)
             }
@@ -24,23 +26,6 @@ struct BeerDetailView: View {
         .background(Color.brewBackground)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-    }
-
-    private var nameHeader: some View {
-        HStack {
-            Text(beer.name)
-                .font(.title)
-                .bold()
-            Spacer()
-            Button {
-                favourites.toggle(beer)
-            } label: {
-                Image(systemName: favourites.isFavourite(beer) ? "heart.fill" : "heart")
-                    .font(.title2)
-                    .foregroundStyle(favourites.isFavourite(beer) ? .red : .secondary)
-            }
-        }
-        .padding(.horizontal)
     }
 
     private var metadata: some View {
@@ -71,35 +56,6 @@ struct BeerDetailView: View {
     }
 
     @ViewBuilder
-    private var ingredientsSection: some View {
-        if let ingredients = beer.ingredients {
-            VStack(alignment: .leading, spacing: 10) {
-                SectionHeader(title: "Ingredients")
-                if let malts = ingredients.malt, !malts.isEmpty {
-                    IngredientGroup(heading: "Malt") {
-                        ForEach(malts, id: \.name) { malt in
-                            IngredientRow(name: malt.name, amount: malt.amount)
-                        }
-                    }
-                }
-                if let hops = ingredients.hops, !hops.isEmpty {
-                    IngredientGroup(heading: "Hops") {
-                        ForEach(Array(hops.enumerated()), id: \.offset) { _, hop in
-                            IngredientRow(name: hop.name, amount: hop.amount, detail: hop.add)
-                        }
-                    }
-                }
-                if let yeast = ingredients.yeast {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Yeast").font(.subheadline).bold()
-                        Text(yeast).font(.body)
-                    }
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
     private var brewersTipsSection: some View {
         if let tips = beer.brewersTips, !tips.isEmpty {
             VStack(alignment: .leading, spacing: 6) {
@@ -108,31 +64,85 @@ struct BeerDetailView: View {
             }
         }
     }
+}
 
-    @ViewBuilder
-    private var foodPairingSection: some View {
-        if let pairings = beer.foodPairing, !pairings.isEmpty {
-            VStack(alignment: .leading, spacing: 6) {
-                SectionHeader(title: "Food Pairing")
-                ForEach(pairings, id: \.self) { pairing in
-                    Button {
-                        selectedPairing = pairing
-                    } label: {
-                        Label(pairing, systemImage: "fork.knife")
-                            .font(.body)
-                            .foregroundStyle(.primary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+private struct BeerNameHeader: View {
+    let beer: Beer
+    @Environment(FavouritesStore.self) private var favourites
+
+    var body: some View {
+        HStack {
+            Text(beer.name)
+                .font(.title)
+                .bold()
+            Spacer()
+            Button {
+                favourites.toggle(beer)
+            } label: {
+                Image(systemName: favourites.isFavourite(beer) ? "heart.fill" : "heart")
+                    .font(.title2)
+                    .foregroundStyle(favourites.isFavourite(beer) ? .red : .secondary)
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
+private struct IngredientsSection: View {
+    let ingredients: Ingredients
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "Ingredients")
+            if let malts = ingredients.malt, !malts.isEmpty {
+                IngredientGroup(heading: "Malt") {
+                    ForEach(malts, id: \.name) { malt in
+                        IngredientRow(name: malt.name, amount: malt.amount)
                     }
                 }
             }
-            .sheet(isPresented: Binding(
-                get: { selectedPairing != nil },
-                set: { if !$0 { selectedPairing = nil } }
-            )) {
-                if let pairing = selectedPairing {
-                    RecipeSheetView(query: pairing)
-                        .presentationDetents([.medium, .large])
+            if let hops = ingredients.hops, !hops.isEmpty {
+                IngredientGroup(heading: "Hops") {
+                    ForEach(Array(hops.enumerated()), id: \.offset) { _, hop in
+                        IngredientRow(name: hop.name, amount: hop.amount, detail: hop.add)
+                    }
                 }
+            }
+            if let yeast = ingredients.yeast {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Yeast").font(.subheadline).bold()
+                    Text(yeast).font(.body)
+                }
+            }
+        }
+    }
+}
+
+private struct FoodPairingSection: View {
+    let pairings: [String]
+    @State private var selectedPairing: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            SectionHeader(title: "Food Pairing")
+            ForEach(pairings, id: \.self) { pairing in
+                Button {
+                    selectedPairing = pairing
+                } label: {
+                    Label(pairing, systemImage: "fork.knife")
+                        .font(.body)
+                        .foregroundStyle(.primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+        .sheet(isPresented: Binding(
+            get: { selectedPairing != nil },
+            set: { if !$0 { selectedPairing = nil } }
+        )) {
+            if let pairing = selectedPairing {
+                RecipeSheetView(query: pairing)
+                    .presentationDetents([.medium, .large])
             }
         }
     }
